@@ -1,0 +1,94 @@
+派单系统:
+派单:http://api.esoaru.net/api-dispatch/dispatch/37/11
+退单:http://api.esoaru.net/api-dispatch/chargeback/37
+查看单的状态:http://api.esoaru.net/api-dispatch/query-service-order-status/37
+添加举报任务:http://api.esoaru.net/api-dispatch/add-task-publishhttp://api.esoaru.net/api-dispatch/complete-cmo-invite-task
+处理任务:http://api.esoaru.net/api-dispatch/handle-task-publish
+CMO拉人进群任务:http://api.esoaru.net/api-dispatch/query-detail-invite-taskpublish
+创建CMO任务:http://api.esoaru.net/api-dispatch/add-cmo-invite-task
+完成CMO任务:http://api.esoaru.net/api-dispatch/complete-cmo-invite-task
+查询任务中心:http://api.esoaru.net/api-dispatch/query-task-center
+完成服务单:http://api.esoaru.net/api-dispatch/done/16
+
+
+
+
+
+查询lhb系统的完单接口确认服务完成:
+http://api.esoaru.net/api-lhb/service-shop/api/v1/confirm_service
+private_domian:
+1.http://api.esoaru.net/api-lhb/private_domain_api/query-product-detail		# 查询产品详情
+2.http://api.esoaru.net/api-lhb/private_domain_api/query-selection-officer	# 查询自己的选品记录
+3.http://api.esoaru.net/api-lhb/private_domain_api/query-product-consult	# 查询某个商品的咨询列表
+4.http://api.esoaru.net/api-lhb/private_domain_api/query-neighbors-products	# 查看是否小区邻居购买
+5.http://api.esoaru.net/api-lhb/private_domain_api/query-commodity-commission/<slug>/	# 通过商品规格slug查询开放咨询分佣收益
+
+
+
+	http://api.esoaru.net/api-lhb/service-shop/api/v1/confirm_service?order=d26abcf393dc6993bcac857fe2b0f50e  
+
+3.service_shop:
+http://api.esoaru.net/api-lhb/service-shop/api/v1/query_service_item		# 查询服务清单
+
+
+shop_manage.py
+1.http://api.esoaru.net/api-lhb/shop-manager/api/query-product
+2.http://api.esoaru.net/api-lhb/shop-manager/api/add-logistics
+
+
+
+
+用户系统:
+测试CMO任务信号:http://api.esoaru.net/api-im2/relationship/test-cmo-task
+
+
+
+打卡任务:http://api.esoaru.net/api-dispatch/query-list-task
+
+
+商城系统接口:
+服务商子系统:
+	http://api.esoaru.net/api-lhb/service-shop/api/v1/query_service_item
+
+
+private_domain:
+http://api.esoaru.net/api-lhb/private_domain_api/query-products
+http://api.esoaru.net/api-lhb/private_domain_api/query-selection-products	# 查询小区热门商品 / 高额营销费商品 / 全部可首单购买的商品
+
+
+
+
+1.登录接口:post请求—http://api.esoaru.net/api-lhb/shop-manager/api/login
+2.当前用户接口:http://api.esoaru.net/api-lhb/shop-manager/api/currentUser    fjblrx8nir5kdp9rja1sbs37r757jcco
+{
+    "username": "tangzhenhua",
+    "password": "TANG19970328"
+    // "partner": 66
+}
+
+批量上传商品图片:http://api.esoaru.net/api-lhb/shop-manager/api/add-product-list
+
+
+过了当天遗漏次数+1
+一天只能打一次卡
+1.在任务单模型中新增:遗漏次数字段 和 完成次数字段
+2.在打卡任务的视图函数中查询到打卡任务
+
+
+{
+    "target_id": 1,
+    // "task_id": 158,
+    "handlers": 
+        {
+            "phone": "13760313219"
+        }
+    
+}
+
+写商城系统文档的思路
+1.将整个系统的设计思路，整体框架，与其他系统的交互通过图形的方式绘制出来或者文字描述清楚
+2.将数据表的结构，功能和每个字段的含义，以及表中的外键标识出来
+3.描写每个接口的功能，调用接口需要传哪些参数，这个接口查询的是哪张表中的参数，复杂查询的逻辑是什么
+4.将调用接口正确的响应和错误的响应写出来
+
+
