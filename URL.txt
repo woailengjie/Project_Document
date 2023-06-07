@@ -27,8 +27,11 @@ private_domian:
 
 	http://api.esoaru.net/api-lhb/service-shop/api/v1/confirm_service?order=d26abcf393dc6993bcac857fe2b0f50e  
 
-3.service_shop:
+3.service_shop:(服务易)
 http://api.esoaru.net/api-lhb/service-shop/api/v1/query_service_item		# 查询服务清单
+http://api.esoaru.net/api-lhb/service-shop/api/v1/query_service_shop		# 查询报价
+http://api.esoaru.net/api-lhb/service-shop/api/v1/query_specification		# 查询规格
+http://api.esoaru.net/api-lhb/service-shop/api/v1/query_service_shop_item
 
 
 shop_manage.py
@@ -38,7 +41,7 @@ shop_manage.py
 
 
 
-用户系统:
+用户系统:                                                                                                                                                                                                                          
 测试CMO任务信号:http://api.esoaru.net/api-im2/relationship/test-cmo-task
 
 
@@ -90,5 +93,7 @@ http://api.esoaru.net/api-lhb/private_domain_api/query-selection-products	# 查�
 2.将数据表的结构，功能和每个字段的含义，以及表中的外键标识出来
 3.描写每个接口的功能，调用接口需要传哪些参数，这个接口查询的是哪张表中的参数，复杂查询的逻辑是什么
 4.将调用接口正确的响应和错误的响应写出来
+
+{"cityPartner": {"tag": "城市合伙人", "identity": ["GOO", "MOO", "TOO"]}, "cityMerchants": {"tag": "城市商户", "identity": ["service", "enterprise_service", "shop", "cloud_warehouse", "farmer"]}, "communityPartner": {"tag": "小区合伙人", "identity": ["CMO", "COO", "CFO"]}, "communityMerchants": {"tag": "小区商户", "identity": ["community_spokesperson", "neighborhood_leader", "neighborhood_warehouse", "neighborhood_courier", "neighborhood_service"]}}
 
 
