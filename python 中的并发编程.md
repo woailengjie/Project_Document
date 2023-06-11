@@ -5,8 +5,7 @@
 
 
 **1秒即永恒**
-对人类来说，`1天=24 * 60 * 60 =86400秒`，一天和1秒也就相差4个数量级
-`1年=31536000秒`，1年和1秒相差8个数量级
+		对人类来说，`1天=24 * 60 * 60 =86400秒`，一天和1秒也就相差4个数量级，`1年=31536000秒`，1年和1秒相差8个数量级
 
 ​		在高速处理计算的CPU来说，而`1GHz=10^9Hz`，即我们知道一个程序就是一些代码行，每个代码行又会被翻译成一条条的指令交给计算机执行，一条指令的执行时间一般就`几纳秒~几十纳秒`(*涉及指令周期，不过多介绍*)
 CPU执行一条指令的时间在纳秒级， 一般一个3.6GHz频率的CPU
@@ -19,9 +18,7 @@ CPU执行一条指令的时间在纳秒级， 一般一个3.6GHz频率的CPU
 
 - 并行(parallelism)：对于多核CPU而言，本质是计算机确实能够在同一时间执行多个任务
 
-```python
 
-```
 
 ## 进程与线程
 ### 进程
@@ -32,7 +29,7 @@ CPU执行一条指令的时间在纳秒级， 一般一个3.6GHz频率的CPU
 
 #### 
 
-
+待完善
 
 
 
@@ -42,7 +39,7 @@ CPU执行一条指令的时间在纳秒级， 一般一个3.6GHz频率的CPU
 
 ## python中的多进程
 
-
+待完善
 
 
 
@@ -99,7 +96,6 @@ from threading import Thread
 from time import time, sleep
 
 
-
 def download(filename):
     print(f"开始下载音乐文件:{filename}")
     download_time = randint(5, 10)		# 随机生成一个数
@@ -107,6 +103,7 @@ def download(filename):
     print(f"{filename}下载完成,共花费 {download_time} 秒")
     
 start = time()		# 主线程记录起始时间
+
 th1 = Thread(target=download, args=('七里香.mp3', ))
 th2 = Thread(target=download, args=('晴天.mp3', ))
 th3 = Thread(target=download, args=('最伟大的作品.mp3', ))
@@ -156,6 +153,7 @@ class DownloadThread(Thread):
 
 
 mp4_files = ["七里香.mp4", "简单爱.mp4", "以父之名.mp4"]
+
 # 使用列表推导式生成三个自定义的线程对象
 threads = [DownloadThread(mp4_file) for mp4_file in mp4_files]
 
@@ -172,15 +170,98 @@ print(f"下载所有音乐一共耗时: {end - start} 秒")
 
 
 
+#### 使用线程池
+
+> 线程池在程序运行时创建大量空闲的线程，程序只需将一个函数提交给线程池，线程池就会启动一个空闲的线程来执行它，当该函数执行结束后，该线程并不被kill掉，而是再次返回到线程池中变成空闲状态，等待执行下一个函数
+
+在实际开发中，线程的创建和释放都会带来较大的开销，（线程之间的上下文切换）频繁的创建和释放线程通常不是一个很好的选择，所以可以提前准备若干个线程，在使用中不需要自己写代码创建和释放线程，而是直接复用线程池中的线程
+
+`python内置的concurrent.future模块提供了对线程池的支持`
+
+>使用线程池可以有效的控制系统中并发线程的数量，无限的创建线程可能会导致Python解释器崩溃
+>
+>使用线程池管理并发编程，只要将相应的task函数提交给线程池，剩下的事情由线程池搞定
+
+使用线程池来执行线程任务的步骤如下:
+
+- 调用`ThreadPoolExecutor`类的构造器创建一个线程池
+- 定义一个普通函数作为线程的任务
+- 调用`ThreadPoolExecutor `对象的` submit() `方法来提交线程任务
+
+```python
+import time
+import random
+from concurrent.futures import ThreadPoolExecutor
 
 
+def task(mp4_url):
+    """
+    mp4_url:下载歌曲的链接
+    """
+    print(f"开始下载 {mp4_url} 歌曲")
+    time.sleep(5)
+    return random.randint(0, 10)
+
+def task_done(response):
+    print("任务执行后的返回值:")
+
+# 创建线程池，最多维护5个线程
+pool = ThreadPoolExecutor(5)
+
+# 使用列表推导式构造20条虚假的歌曲链接
+url_list = [f"https://www.flase-kugou-{i}" for i in range(20)]
+
+for url in url_list:
+    pool.submit(task, url)
+
+# 调用 shutdown() 方法后的线程池不再接收新任务,但会将以前所有的已提交任务执行完成
+# pool.shutdown(True)		# 大家可以注释掉和取消注释这一行看看程序执行效果
+# 关闭线程池: 让主线程等待所有任务执行完成再执行,类似于之前的 join() 方法阻塞主线程
+
+print("继续往下走~")
+print("所有歌曲下载完毕!")
+    
+```
+
+`submit(fn, *args):将fn函数提交给线程池,*args代表传给fn函数的参数`
+
+> 程序将 `task` 函数 `submit` 给线程池后，`submit` 方法返回一个Future对象，Future类主要用于获取线程任务函数的返回值
+
+多说无益，上代码看效果
+
+`应用场景：分工合作，task专门负责下载，done专门负责将下载的数据写入本地文件`
+
+```python
+import time
+import random
+from concurrent.futures import ThreadPoolExecutor
 
 
+def task(mp4_url):
+    """
+    mp4_url:下载歌曲的链接
+    """
+    print(f"开始下载 {mp4_url} 歌曲")
+    time.sleep(5)
+    return random.randint(0, 10)
 
 
+def task_done(response):
+    print(f"任务执行后的返回值: {response.result()}")
 
 
+# 创建线程池，最多维护10个线程
+pool = ThreadPoolExecutor(5)
 
+# 使用列表推导式构造20条虚假的歌曲链接
+url_list = [f"https://www.flase-kugou-{i}" for i in range(20)]
 
-#### 3. 使用线程池
+for url in url_list:
+    future = pool.submit(task, url)
+    future.add_done_callback(task_done)
+
+pool.shutdown(True)
+print("继续往下走~")
+print("所有歌曲下载完毕!")
+```
 
