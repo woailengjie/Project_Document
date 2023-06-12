@@ -174,7 +174,7 @@ print(f"下载所有音乐一共耗时: {end - start} 秒")
 
 > 线程池在程序运行时创建大量空闲的线程，程序只需将一个函数提交给线程池，线程池就会启动一个空闲的线程来执行它，当该函数执行结束后，该线程并不被kill掉，而是再次返回到线程池中变成空闲状态，等待执行下一个函数
 
-在实际开发中，线程的创建和释放都会带来较大的开销，（线程之间的上下文切换）频繁的创建和释放线程通常不是一个很好的选择，所以可以提前准备若干个线程，在使用中不需要自己写代码创建和释放线程，而是直接复用线程池中的线程
+在实际开发中，线程的创建和释放都会带来较大的开销，（线程之间的上下文切换）频繁的创建和释放线程通常不是一个很好的选择，所以可以提前准备若干个线程，在使用中不需要自己写代码创建和释放线程，而是直接`复用线程池中的线程`
 
 `python内置的concurrent.future模块提供了对线程池的支持`
 
@@ -215,7 +215,7 @@ for url in url_list:
     pool.submit(task, url)
 
 # 调用 shutdown() 方法后的线程池不再接收新任务,但会将以前所有的已提交任务执行完成
-# pool.shutdown(True)		# 大家可以注释掉和取消注释这一行看看程序执行效果
+pool.shutdown(True)		# 大家可以注释掉和取消注释这一行看看程序执行效果
 # 关闭线程池: 让主线程等待所有任务执行完成再执行,类似于之前的 join() 方法阻塞主线程
 
 print("继续往下走~")
@@ -229,7 +229,7 @@ print("所有歌曲下载完毕!")
 
 多说无益，上代码看效果
 
-`应用场景：分工合作，task专门负责下载，done专门负责将下载的数据写入本地文件`
+`应用场景1: 分工合作，task专门负责下载，done专门负责将下载的数据写入本地文件`
 
 ```python
 import time
@@ -254,10 +254,10 @@ def task_done(response):
 pool = ThreadPoolExecutor(5)
 
 # 使用列表推导式构造20条虚假的歌曲链接
-url_list = [f"https://www.flase-kugou-{i}" for i in range(20)]
+url_list = [f"https://www.flase-kugounusic-{i}" for i in range(20)]
 
 for url in url_list:
-    future = pool.submit(task, url)
+    future = pool.submit(task, url)		# 
     future.add_done_callback(task_done)
 
 pool.shutdown(True)
@@ -265,3 +265,42 @@ print("继续往下走~")
 print("所有歌曲下载完毕!")
 ```
 
+#### 线程安全
+
+`一个进程中可以有多个线程, 且线程共享所有进程中的资源`
+
+> 在多个线程竞争同一个资源的情况下，如果没有合理的机制来保护被竞争的资源，可能会出现数据紊乱，程序达不到我们预期的效果
+
+示例如下：
+
+```python
+import time
+import random
+from concurrent.futures import ThreadPoolExecutor
+
+
+class Account(object):
+    """银行账户"""
+
+    def __init__(self):
+        self.balance = 0.0  # 表示现有余额
+
+    def deposit(self, save_money):
+        new_balance = self.balance + save_money  # 新的余额等于旧的余额+存进去的money
+        time.sleep(random.uniform(0.01, 0.9))   # 模拟一个0.01~0.9s的随机延时
+        self.balance = new_balance			# 更新现有余额
+
+        
+account = Account()  # 实例化一个银行账户类
+
+pool = ThreadPoolExecutor(5)
+for _ in range(20):
+    pool.submit(account.deposit, 100)
+
+pool.shutdown(True)
+print(account.balance)	# 请大家多运行几次看看每次输出结果是否一致
+```
+
+> 这里通过线程池的方式启动了20个线程向同一个账户转账100元，按理来说最后的账户余额应该是20000元才对，大家运行之后可以看到每次的结果并不一致，这是因为程序的执行是并发+异步，每个线程的执行顺序是由操作系统调度的，不可预知，假设当001号线程执行到第12行刚把money存进去，还未执行第14行更新现有余额的时候，此时002号线程也开始执行到第12行，但此时002号线程取出的钱是旧的余额，两个线程都执行完第14行后本来应该存进去的200元结果变成100元
+>
+> 即“丢失更新”线程，之前线程修改数据的结果被后序线程修改的结果给覆盖掉了，得不到正确的结果
